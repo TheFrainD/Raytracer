@@ -1,0 +1,70 @@
+name: Build
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+    name: ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - {
+              name: "Windows MSVC",
+              os: "windows-2022",
+              flags: "-A x64"
+          }
+          - {
+              name: "Windows Clang",
+              os: "windows-2022",
+              flags: "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -GNinja"
+          }
+          - {
+              name: "Linux GCC",
+              os: "ubuntu-latest",
+              flags: "-GNinja"
+          }
+          - {
+              name: "Linux Clang",
+              os: "ubuntu-latest",
+              flags: "-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -GNinja"
+          }
+          - {
+              name: "MacOS",
+              os: "macos-11",
+              flags: "-GNinja"
+          }
+          - {
+              name: "MacOS Xcode",
+              os: "macos-11",
+              flags: "-GXcode"
+          }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install cmake ninja-build xorg-dev libgl1-mesa-dev
+
+      - name: Install MacOS Dependencies
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install cmake ninja python3
+
+      - name: Configure CMake
+        shell: bash
+        run: cmake -B build -DCMAKE_BUILD_TYPE="Release" ${{matrix.platform.flags}}
+
+      - name: Build
+        shell: bash
+        run: cmake --build build

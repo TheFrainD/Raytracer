@@ -3,7 +3,10 @@ project(Raytracer)
 
 find_package(OpenGL REQUIRED)
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+file(GLOB_RECURSE ${PROJECT_NAME}_SRC src/*.cpp)
+add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SRC})
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 add_subdirectory(deps)
 

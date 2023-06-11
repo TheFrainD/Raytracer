@@ -7,8 +7,5 @@ add_subdirectory(glfw EXCLUDE_FROM_ALL)
 # glad
 add_subdirectory(glad)
 
-# stb
-include_directories(stb)
-
 # glm
-include_directories(deps/glm)
+add_subdirectory(glm)

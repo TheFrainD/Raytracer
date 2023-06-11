@@ -10,5 +10,5 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
 
 add_subdirectory(deps)
 
-target_include_directories(${PROJECT_NAME} PRIVATE include)
-target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw)
+target_include_directories(${PROJECT_NAME} PRIVATE include deps/stb)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad glfw glm::glm)

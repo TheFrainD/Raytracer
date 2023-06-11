@@ -2,11 +2,16 @@
 
 #include <stdexcept>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
+
+#include "image/format.h"
+
 namespace image {
 
 Image::Image(const std::uint32_t width, const std::uint32_t height, const ColorSpace color_space)
     : color_space_(color_space) {
-    if (width_ == 0 || height_ == 0) {
+    if (width == 0 || height == 0) {
         throw std::invalid_argument {"Width or height cannot be zero"};
     }
     width_  = width;
@@ -71,6 +76,38 @@ void Image::InsertPixel(const Pixel& pixel) noexcept {
     buffer_.push_back(pixel.b);
     if (color_space_ == ColorSpace::kRgba) {
         buffer_.push_back(pixel.a);
+    }
+}
+
+void Image::Write(const std::string& filename) const {
+    const auto dot_pos {filename.rfind('.')};
+
+    if (dot_pos == std::string::npos || dot_pos == filename.length() - 1) {
+        throw std::runtime_error {"Failed to acquire image extension"};
+    }
+
+    const auto extension {filename.substr(dot_pos + 1)};
+    const auto format = Format(extension);
+
+    const auto comp {static_cast<int>(color_space_)};
+    int result {0};
+    switch (format.GetFormat()) {
+        case Format::InternalFormat::kPng:
+            result = stbi_write_png(filename.c_str(), static_cast<int>(width_), static_cast<int>(height_), comp,
+                                    buffer_.data(), static_cast<int>(width_ * comp));
+            break;
+        case Format::InternalFormat::kJpg:
+            result = stbi_write_jpg(filename.c_str(), static_cast<int>(width_), static_cast<int>(height_), comp,
+                                    buffer_.data(), 100);
+            break;
+        case Format::InternalFormat::kBmp:
+            result = stbi_write_bmp(filename.c_str(), static_cast<int>(width_), static_cast<int>(height_), comp,
+                                    buffer_.data());
+            break;
+    }
+
+    if (result == 0) {
+        throw std::runtime_error {"Failed to write the image"};
     }
 }
 

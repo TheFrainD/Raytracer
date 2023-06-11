@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "image/pixel.h"
@@ -14,7 +15,7 @@ enum class ColorSpace {
 
 class Image {
 public:
-    Image(std::uint32_t width, std::uint32_t height, ColorSpace color_space);
+    Image(std::uint32_t width, std::uint32_t height, ColorSpace color_space = ColorSpace::kRgb);
 
     [[nodiscard]] std::uint32_t GetWidth() const noexcept;
     [[nodiscard]] std::uint32_t GetHeight() const noexcept;
@@ -26,6 +27,8 @@ public:
     void SetColorSpace(ColorSpace color_space) noexcept;
     void SetPixel(std::uint32_t x, std::uint32_t y, const Pixel &pixel);
     void InsertPixel(const Pixel &pixel) noexcept;
+
+    void Write(const std::string &filename) const;
 
 private:
     std::uint32_t width_;
